@@ -8,11 +8,9 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.previewlibrary.GPVideoPlayerActivity;
 import com.previewlibrary.GPreviewActivity;
@@ -45,7 +43,7 @@ public class BasePhotoFragment extends Fragment {
     protected SmoothImageView imageView;
     protected View rootView;
     protected View loading;
-    protected MySimpleTarget<Bitmap> mySimpleTarget;
+    protected MySimpleTarget mySimpleTarget;
     protected View btnVideo;
     public static VideoClickListener listener;
 
@@ -107,6 +105,9 @@ public class BasePhotoFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         ZoomMediaLoader.getInstance().getLoader().clearMemory(getActivity());
+        if (getActivity() != null && getActivity().isFinishing()) {
+            listener = null;
+        }
     }
 
     public void release() {
@@ -123,7 +124,6 @@ public class BasePhotoFragment extends Fragment {
             btnVideo.setOnClickListener(null);
             imageView = null;
             rootView = null;
-            listener = null;
             isTransPhoto = false;
         }
     }
@@ -152,14 +152,7 @@ public class BasePhotoFragment extends Fragment {
 
             }
         });
-        mySimpleTarget = new MySimpleTarget<Bitmap>() {
-            @Override
-            public void onResourceReady(Bitmap bitmap) {
-                   onResourceReady();
-                if (rootView.getTag().toString().equals(beanViewInfo.getUrl())) {
-                    imageView.setImageBitmap(bitmap);
-                }
-            }
+        mySimpleTarget = new MySimpleTarget() {
 
             @Override
             public void onResourceReady() {
@@ -202,13 +195,13 @@ public class BasePhotoFragment extends Fragment {
             rootView.setTag(beanViewInfo.getUrl());
             //是否展示动画
             isTransPhoto = bundle.getBoolean(KEY_TRANS_PHOTO, false);
-            if ( beanViewInfo.getUrl().toLowerCase().contains(".gif")){
+            if (beanViewInfo.getUrl().toLowerCase().contains(".gif")) {
                 imageView.setZoomable(false);
                 //加载图
-                ZoomMediaLoader.getInstance().getLoader().displayGifImage(this, beanViewInfo.getUrl(),imageView, mySimpleTarget);
-            }else {
+                ZoomMediaLoader.getInstance().getLoader().displayGifImage(this, beanViewInfo.getUrl(), imageView, mySimpleTarget);
+            } else {
                 //加载图
-                ZoomMediaLoader.getInstance().getLoader().displayImage(this, beanViewInfo.getUrl(),mySimpleTarget);
+                ZoomMediaLoader.getInstance().getLoader().displayImage(this, beanViewInfo.getUrl(), imageView, mySimpleTarget);
             }
 
         }

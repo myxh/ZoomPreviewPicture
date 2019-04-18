@@ -29,28 +29,29 @@ import com.previewlibrary.loader.MySimpleTarget;
 
 public class TestImageLoader implements IZoomMediaLoader {
 
+
     @Override
-    public void displayImage(@NonNull Fragment context,@NonNull String path, final@NonNull MySimpleTarget<Bitmap> simpleTarget) {
+    public void displayImage(@NonNull Fragment context, @NonNull String path, ImageView imageView, @NonNull final MySimpleTarget simpleTarget) {
         Glide.with(context).load(path)
-               .asBitmap()
+                .asBitmap()
                 .error(R.drawable.ic_default_image)
-                .into(new SimpleTarget<Bitmap>() {
+              //  .placeholder(android.R.color.darker_gray)
+                .fitCenter()
+                .centerCrop()
+                .listener(new RequestListener<String, Bitmap>() {
                     @Override
-                    public void onLoadStarted(Drawable placeholder) {
-                        super.onLoadStarted(placeholder);
+                    public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                        simpleTarget.onLoadFailed(null);
+                        return false;
                     }
 
                     @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                        simpleTarget.onResourceReady(resource);
+                    public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        simpleTarget.onResourceReady();
+                        return false;
                     }
-
-                    @Override
-                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        super.onLoadFailed(e, errorDrawable);
-                        simpleTarget.onLoadFailed(errorDrawable);
-                    }
-                });
+                })
+                .into(imageView);
     }
 
     @Override
@@ -75,9 +76,6 @@ public class TestImageLoader implements IZoomMediaLoader {
                     }
                 })
                 .into(imageView);
-
-
-
     }
     @Override
     public void onStop(@NonNull Fragment context) {

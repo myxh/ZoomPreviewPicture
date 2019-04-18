@@ -53,12 +53,12 @@ public class GPreviewActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initData();
         if (setContentLayout() == 0) {
             setContentView(R.layout.activity_image_preview_photo);
         } else {
             setContentView(setContentLayout());
         }
-        initData();
         initView();
     }
 
@@ -91,6 +91,11 @@ public class GPreviewActivity extends FragmentActivity {
         type = (GPreviewBuilder.IndicatorType) getIntent().getSerializableExtra("type");
         isShow = getIntent().getBooleanExtra("isShow", true);
         int duration = getIntent().getIntExtra("duration", 300);
+         boolean isFullscreen=getIntent().getBooleanExtra("isFullscreen",false);
+        SmoothImageView.setFullscreen(isFullscreen);
+         if (isFullscreen){
+             setTheme(android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+         }
         try {
             SmoothImageView.setDuration(duration);
             Class<? extends BasePhotoFragment> sss;
@@ -190,6 +195,7 @@ public class GPreviewActivity extends FragmentActivity {
         if (isTransformOut) {
             return;
         }
+        getViewPager().setEnabled(false);
         isTransformOut = true;
         int currentItem = viewPager.getCurrentItem();
         if (currentItem < imgUrls.size()) {
@@ -203,6 +209,7 @@ public class GPreviewActivity extends FragmentActivity {
             fragment.transformOut(new SmoothImageView.onTransformListener() {
                 @Override
                 public void onTransformCompleted(SmoothImageView.Status status) {
+                    getViewPager().setEnabled(true);
                     exit();
                 }
             });
